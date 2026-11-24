@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: koulovana
+  labels:
+    app: koulovana
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: koulovana
+  template:
+    metadata:
+      labels:
+        app: koulovana
+    spec:
+      containers:
+        - name: koulovana
+          # Před nasazením uprav na svůj registry (např. ghcr.io/uzivatel/koulovana:1.0.0).
+          image: ghcr.io/CHANGE-ME/koulovana:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 5000
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true

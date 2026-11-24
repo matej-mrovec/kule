@@ -1,0 +1,7 @@
+services:
+  koulovana:
+    build: .
+    image: koulovana:local
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
